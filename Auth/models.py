@@ -1,13 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager
-
+import uuid
 
 # Create your models here.
 
 class Usermanager(BaseUserManager):
     def create_user(self, email, name, password=None):
         if not email:
-            raise ValueError('user must have an email')
+            raise ValueError('Auth must have an email')
         email = self.normalize_email(email)
         user = self.model(name=name, email=email)
         user.set_password(password)
@@ -15,6 +15,7 @@ class Usermanager(BaseUserManager):
         return user
 
     def superuser(self, name, email, password):
+        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
         user = self.create_user(email, name, password)
         user.is_superuser = True
         user.is_active = True
