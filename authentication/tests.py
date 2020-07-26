@@ -14,7 +14,7 @@ class UserTest(TestCase):
         CustomUser.objects.create(email="admin@ymail.com", name='ibrahim')
         self.client = APIClient()
         self.data = {
-            "email": "gjgktg.ibrahim3@gmail.com",
+            "email":"ibrahim3@gmail.com",
             "name": "ibrahim Hamzat",
             "password": "hamzat123"
         }
@@ -34,4 +34,6 @@ class UserTest(TestCase):
 
     def test_user_can_login(self):
         """ Testing CustomUser AUTH """
-        response = self.client.post(reverse('sign_in'),data={})
+        response = self.client.post(reverse('sign_in'), data={"email": "ibrahim3@gmail.com","password": "hamzat123"})
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+

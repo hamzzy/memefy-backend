@@ -1,48 +1,58 @@
 import datetime
 
 from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 import uuid
-from django.utils.translation import ugettext_lazy as _
-import jwt
 # Create your models here.
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from MemeApp import settings
 
-
-class UserManager(BaseUserManager):
-
-    def create_user(self, email, name, password=None):
+class MyUserManager(BaseUserManager):
+    def create_user(self, name, email, password=None):
+        """
+        Creates and saves a User with the given email, date of
+        birth and password.
+        """
         if not email:
-            raise ValueError('authentication must have an email')
-        email = self.normalize_email(email)
-        user = self.model(name=name, email=email)
+            raise ValueError('Users must have an email address')
+
+        user = self.model(
+            name=name,
+            email=self.normalize_email(email)
+
+        )
+
         user.set_password(password)
-        user.save(using=self._db)
-        return user
+        user.save()
 
-    def create_superuser(self, name , email, password):
+    def create_superuser(self, name, email, password=None):
         """
-
-        :type email: object
+        Creates and saves a superuser with the given email, date of
+        birth and password.
         """
-        user = self.create_user(email=email, name=name, password=password)
-        user.is_active = True
+        user = self.create_user(
+            name,
+            email,
+            password
+        )
+        user.is_superuser = True
         user.is_staff = True
-        user.save(using=self._db)
+        user.save()
         return user
 
 
-class CustomUser(AbstractBaseUser):
+class CustomUser(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, null=False)
-    email = models.EmailField(max_length=225, unique=True)
     name = models.CharField(max_length=225)
+    email = models.EmailField(max_length=225, unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    objects = UserManager()
+    objects = MyUserManager()
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELD = ['name']
+    REQUIRED_FIELDS = ['name']
+
+    def __str__(self):
+        return self.name
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
@@ -53,15 +63,6 @@ class CustomUser(AbstractBaseUser):
         "Does the user have permissions to view the app `app_label`?"
         # Simplest possible answer: Yes, always
         return True
-
-    @property
-    def is_staff(self):
-        "Is the user a member of staff?"
-        # Simplest possible answer: All admins are staff
-        return self.is_admin
-
-    def __str__(self):
-        return self.name
 
     def get_full_name(self):
         """
@@ -78,3 +79,10 @@ class CustomUser(AbstractBaseUser):
         the user's real name, we return their username instead.
         """
         return self.name
+
+    def tokens(self):
+        refresh = RefreshToken.for_user(self)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
+        }

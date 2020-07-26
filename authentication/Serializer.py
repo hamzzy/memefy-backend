@@ -5,7 +5,7 @@ from .models import CustomUser
 from django.contrib.auth import authenticate
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
     """
     Registeration Serilizer
     Return:authentication Registered
@@ -26,20 +26,21 @@ class RegisterSerializer(serializers.ModelSerializer):
             )
         return attrs
 
-    def save(self, validated_data):
+    def create(self, validated_data):
         # Use the `create_user` method we wrote earlier to create a new user.
-        return self.Meta.model.objects.create_user(**validated_data)
+        # as long as the fields are the same, we can just use this
 
+        return CustomUser.objects.create_user(**validated_data)
 
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.CharField(max_length=255)
-    name = serializers.CharField(max_length=255, read_only=True)
-    password = serializers.CharField(max_length=128)
+    name=serializers.CharField(max_length=255, read_only=True)
+    password = serializers.CharField(max_length=128,write_only=True)
     tokens = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'name','password', 'tokens']
+        fields = ['email', 'name', 'password','tokens']
 
     def validate(self, attrs):
         email = attrs.get('email', '')
@@ -57,7 +58,7 @@ class LoginSerializer(serializers.ModelSerializer):
                 'A password is required to log in.'
             )
         user = authenticate(email=email, password=password)
-        if user is None:
+        if not user:
             raise serializers.ValidationError(
                 'A user with this email and password was not found.'
             )
@@ -65,5 +66,5 @@ class LoginSerializer(serializers.ModelSerializer):
         return {
             'email': user.email,
             'name': user.name,
-            'tokens': user.tokens
+            'tokens':user.tokens
         }
