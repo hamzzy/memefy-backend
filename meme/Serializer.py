@@ -5,6 +5,6 @@
 #
 # class Userserilizer(serializers.ModelSerializer):
 #     '''
-#     Auth serilizer
+#     authentication serilizer
 #     '''
 #     pass
