@@ -6,6 +6,13 @@ import uuid
 
 
 # Create your models here.
+class MemeCategories(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=250, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 class Meme(models.Model):
 
@@ -16,6 +23,7 @@ class Meme(models.Model):
     title = models.CharField(max_length=200, null=False)
     file = models.FileField(blank=False, null=False)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    memecat = models.ForeignKey(MemeCategories, on_delete=models.CASCADE,null=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -23,11 +31,4 @@ class Meme(models.Model):
         return self.title
 
 
-class Categories(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=250, null=True, blank=True)
-    meme = models.ForeignKey(Meme, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.name
