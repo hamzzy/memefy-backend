@@ -1,6 +1,8 @@
 from django.contrib import admin
 
 # Register your models here.
-from meme.models import Meme
+from meme.models import Meme,MemeCategories
 
-admin.register(Meme)
+admin.site.register(Meme)
+
+admin.site.register(MemeCategories)
