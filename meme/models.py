@@ -20,11 +20,16 @@ class Meme(models.Model):
     """
     Meme image upload
     """
+
+    type=[
+        ('Image'),
+        ('Video')
+    ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200, null=False)
     image= models.FileField(storage=PublicMediaStorage(),default='')
-    video=models.FileField(storage=PublicMediaStorage(),default='')
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    file = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    meme_type=models.Choices(value=)
     memecat = models.ForeignKey(MemeCategories, on_delete=models.CASCADE, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -34,3 +39,5 @@ class Meme(models.Model):
 
     def __str__(self):
         return self.title
+
+
