@@ -1,0 +1,261 @@
+openapi: 3.0.2
+info:
+  title: ''
+  version: ''
+paths:
+  /api/meme/create_cat_meme/:
+    get:
+      operationId: listMemeCategories
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                      readOnly: true
+                    name:
+                      type: string
+                      maxLength: 255
+                    slug:
+                      type: string
+                      nullable: true
+                      maxLength: 250
+                      pattern: ^[-a-zA-Z0-9_]+$
+                  required:
+                  - name
+          description: ''
+    post:
+      operationId: CreateMemeCategories
+      description: ''
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema: &id001
+              properties:
+                name:
+                  type: string
+                  maxLength: 255
+                slug:
+                  type: string
+                  nullable: true
+                  maxLength: 250
+                  pattern: ^[-a-zA-Z0-9_]+$
+              required:
+              - name
+          application/x-www-form-urlencoded:
+            schema: *id001
+          multipart/form-data:
+            schema: *id001
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                  name:
+                    type: string
+                    maxLength: 255
+                  slug:
+                    type: string
+                    nullable: true
+                    maxLength: 250
+                    pattern: ^[-a-zA-Z0-9_]+$
+                required:
+                - name
+          description: ''
+  /api/meme/add_meme/:
+    get:
+      operationId: listMemes
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                      readOnly: true
+                    title:
+                      type: string
+                      maxLength: 200
+                    fileURL:
+                      type: string
+                    meme_type:
+                      enum:
+                      - image
+                      - video
+                    meme_cat:
+                      type: string
+                      nullable: true
+                  required:
+                  - title
+          description: ''
+    post:
+      operationId: CreateMeme
+      description: ''
+      parameters: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema: &id002
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                fileURL:
+                  type: string
+                meme_type:
+                  enum:
+                  - image
+                  - video
+                meme_cat:
+                  type: string
+                  nullable: true
+              required:
+              - title
+          application/json:
+            schema: *id002
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                  title:
+                    type: string
+                    maxLength: 200
+                  fileURL:
+                    type: string
+                  meme_type:
+                    enum:
+                    - image
+                    - video
+                  meme_cat:
+                    type: string
+                    nullable: true
+                required:
+                - title
+          description: ''
+    delete:
+      operationId: DestroyMeme
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+  /api/auth/sign_up/:
+    post:
+      operationId: CreateCustomUser
+      description: ''
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema: &id003
+              properties:
+                email:
+                  type: string
+                  format: email
+                  maxLength: 225
+                name:
+                  type: string
+                  maxLength: 225
+                password:
+                  type: string
+                  writeOnly: true
+                  maxLength: 255
+                  minLength: 6
+              required:
+              - email
+              - name
+              - password
+          application/x-www-form-urlencoded:
+            schema: *id003
+          multipart/form-data:
+            schema: *id003
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                  email:
+                    type: string
+                    format: email
+                    maxLength: 225
+                  name:
+                    type: string
+                    maxLength: 225
+                required:
+                - email
+                - name
+          description: ''
+  /api/auth/sign_in/:
+    post:
+      operationId: CreateLogin
+      description: ''
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema: &id004
+              properties:
+                email:
+                  type: string
+                  maxLength: 255
+                password:
+                  type: string
+                  writeOnly: true
+                  maxLength: 128
+              required:
+              - email
+              - password
+          application/x-www-form-urlencoded:
+            schema: *id004
+          multipart/form-data:
+            schema: *id004
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  email:
+                    type: string
+                    maxLength: 255
+                  name:
+                    type: string
+                    readOnly: true
+                    maxLength: 255
+                  tokens:
+                    type: string
+                    readOnly: true
+                    maxLength: 255
+                required:
+                - email
+          description: ''

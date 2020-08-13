@@ -1,7 +1,5 @@
 from django.db import models
-
-from MemeApp import settings
-from MemeApp.storage_backends import PrivateMediaStorage, PublicMediaStorage
+from cloudinary.models import CloudinaryField
 from authentication.models import CustomUser
 import uuid
 
@@ -21,16 +19,24 @@ class Meme(models.Model):
     Meme image upload
     """
 
-    type=[
+    type = [
         ('Image'),
         ('Video')
     ]
+    IMAGE = 'image'
+    VIDEO = 'video'
+    STATUS = [
+        (IMAGE, 'image'),
+        (VIDEO, 'video'),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200, null=False)
-    image= models.FileField(storage=PublicMediaStorage(),default='')
-    file = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    meme_type=models.Choices(value=)
-    memecat = models.ForeignKey(MemeCategories, on_delete=models.CASCADE, null=True)
+    file = CloudinaryField('memefy', default='')
+    fileURL = models.CharField(max_length=100, verbose_name='File URL',default='')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    meme_type = models.CharField(max_length=32, choices=STATUS, default='image')
+    meme_cat = models.ForeignKey(MemeCategories, on_delete=models.CASCADE, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -39,5 +45,3 @@ class Meme(models.Model):
 
     def __str__(self):
         return self.title
-
-
