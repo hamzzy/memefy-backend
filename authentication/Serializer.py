@@ -89,7 +89,6 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
         fields = ['email']
 
 
-
 class SetNewPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(
         min_length=6, max_length=68, write_only=True)

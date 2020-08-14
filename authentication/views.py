@@ -69,7 +69,7 @@ class VerifyEmail(generics.GenericAPIView):
 
 
 class ResendEmailVerification(generics.GenericAPIView):
-
+    serializer_class = CustomUserSerializer
     def get(self, request):
 
         user = CustomUser.objects.get(email=request.user.email)
@@ -103,6 +103,8 @@ class LoginView(generics.GenericAPIView):
 
 class RequestPasswordResetEmail(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer
+    permission_classes = (permissions.AllowAny,)
+
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -147,6 +149,8 @@ class PasswordTokenCheckAPI(generics.GenericAPIView):
 
 class SetNewPasswordAPIView(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
+    permission_classes = (permissions.AllowAny,)
+
 
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
