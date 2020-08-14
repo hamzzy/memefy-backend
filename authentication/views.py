@@ -55,7 +55,6 @@ class VerifyEmail(generics.GenericAPIView):
         token = request.GET.get('token')
         try:
             payload = jwt.decode(token, settings.SECRET_KEY)
-            print(payload)
             user = CustomUser.objects.get(id=payload['user_id'])
             if not user.is_verified:
                 user.is_verified = True
@@ -70,8 +69,8 @@ class VerifyEmail(generics.GenericAPIView):
 
 class ResendEmailVerification(generics.GenericAPIView):
     serializer_class = CustomUserSerializer
-    def get(self, request):
 
+    def get(self, request):
         user = CustomUser.objects.get(email=request.user.email)
         print(user)
         token = RefreshToken.for_user(user).access_token
@@ -104,7 +103,6 @@ class LoginView(generics.GenericAPIView):
 class RequestPasswordResetEmail(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer
     permission_classes = (permissions.AllowAny,)
-
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -150,8 +148,6 @@ class PasswordTokenCheckAPI(generics.GenericAPIView):
 class SetNewPasswordAPIView(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
     permission_classes = (permissions.AllowAny,)
-
-
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
