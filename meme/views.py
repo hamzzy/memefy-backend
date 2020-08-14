@@ -25,7 +25,7 @@ class MemeView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     lookup_field = 'id'
 
-    def get(self, request, format=None):
+    def get(self, request):
         items = Meme.objects.filter(user=self.request.user)
         serializer = MemeSerializer(items, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
@@ -63,7 +63,7 @@ class MemeDelete(generics.DestroyAPIView):
     def destroy(self, request, id):
         instance = Meme.objects.get(id=id, user=self.request.user)
         if instance is None:
-            return Response("Cannot delete default system category", status=status.HTTP_400_BAD_REQUEST)
+            return Response("Cannot delete meme", status=status.HTTP_400_BAD_REQUEST)
         else:
             pub1, pub2 = instance.fileURL.split('/')[7:]
             pub_id = pub1 + '/' + pub2
