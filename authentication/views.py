@@ -69,10 +69,10 @@ class VerifyEmail(generics.GenericAPIView):
 
 class ResendEmailVerification(generics.GenericAPIView):
     serializer_class = CustomUserSerializer
+    #permission_classes = ()
 
     def get(self, request):
         user = CustomUser.objects.get(email=request.user.email)
-        print(user)
         token = RefreshToken.for_user(user).access_token
         current_site = get_current_site(request).domain
         relativeLink = reverse('email-verify')
@@ -120,7 +120,11 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             data = {'email_body': email_body, 'to_email': user.email,
                     'email_subject': 'Reset your passsword'}
             Util.send_email(data)
-        return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
+            return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'link you not'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class PasswordTokenCheckAPI(generics.GenericAPIView):

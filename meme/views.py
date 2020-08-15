@@ -9,6 +9,8 @@ from rest_framework import generics, status, permissions
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+
+from authentication.permission import IsOwnerOrReadOnly
 from meme.Serializer import MemeCategory, MemeSerializer
 from meme.models import MemeCategories, Meme
 
@@ -22,7 +24,7 @@ class MemeCatView(generics.ListCreateAPIView):
 class MemeView(generics.GenericAPIView):
     parser_classes = (MultiPartParser, JSONParser)
     serializer_class = MemeSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     lookup_field = 'id'
 
     def get(self, request):
@@ -58,7 +60,7 @@ class MemeView(generics.GenericAPIView):
 
 class MemeDelete(generics.DestroyAPIView):
     serializer_class = MemeSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
 
     def destroy(self, request, id):
         instance = Meme.objects.get(id=id, user=self.request.user)
@@ -81,3 +83,9 @@ class MemeAPIView(generics.ListAPIView):
     queryset = Meme.objects.order_by('-created_at')
 
 
+class MemeSearch(generics.GenericAPIView):
+    permission_classes = (AllowAny,)
+    parser_classes = (JSONParser,)
+
+    def get(self):
+        pass
