@@ -12,7 +12,7 @@ from templated_email import get_templated_mail
 
 from rest_framework.response import Response
 
-from MemeApp import settings
+from memeapp import settings
 from .Serializer import CustomUserSerializer, LoginSerializer, ResetPasswordEmailRequestSerializer, \
     EmailVerificationSerializer, SetNewPasswordSerializer
 from .Utils import Util
