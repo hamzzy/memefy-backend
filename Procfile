@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath  MemeApp.wsgi --log-file -
+web: gunicorn  wsgi:application --log-file -
