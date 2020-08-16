@@ -1,15 +1,19 @@
+import itertools
+import json
 from random import randint
 
 import cloudinary
 from cloudinary import uploader
 from django.http import Http404
 from django.shortcuts import render
-from rest_framework import generics, status, permissions
+from rest_framework import generics, status, permissions, renderers
 # Create your views here.
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-
+from rest_framework.views import APIView
+from authentication.models import CustomUser
 from authentication.permission import IsOwnerOrReadOnly
 from meme.Serializer import MemeCategory, MemeSerializer
 from meme.models import MemeCategories, Meme
@@ -73,19 +77,27 @@ class MemeDelete(generics.DestroyAPIView):
             self.perform_destroy(instance)
         return Response({'msg': 'meme deleted'}, status=status.HTTP_204_NO_CONTENT)
 
+class MemeRenderer(renderers.JSONRenderer):
+    charset = 'utf-8'
 
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        response = ''
+        if 'ErrorDetail' in data:
+            response = json.dumps({'errors': data})
+        else:
+            response = json.dumps({'data': data})
+        return response
 class MemeAPIView(generics.ListAPIView):
     """
     :returns latest json
     """
     permission_classes = (AllowAny,)
     serializer_class = MemeSerializer
-    queryset = Meme.objects.order_by('-created_at')
+    queryset = Meme.objects.all()
+
 
 
 class MemeSearch(generics.GenericAPIView):
     permission_classes = (AllowAny,)
     parser_classes = (JSONParser,)
-
-    def get(self):
-        pass
+    queryset = Meme.objects.all()
