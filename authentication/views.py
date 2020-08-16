@@ -99,6 +99,8 @@ class LoginView(generics.GenericAPIView):
             status=status.HTTP_200_OK
         )
 
+class UpdateProfileView(generics.UpdateAPIView):
+    pass
 
 class RequestPasswordResetEmail(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer

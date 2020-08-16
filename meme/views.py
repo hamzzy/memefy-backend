@@ -77,16 +77,7 @@ class MemeDelete(generics.DestroyAPIView):
             self.perform_destroy(instance)
         return Response({'msg': 'meme deleted'}, status=status.HTTP_204_NO_CONTENT)
 
-class MemeRenderer(renderers.JSONRenderer):
-    charset = 'utf-8'
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        response = ''
-        if 'ErrorDetail' in data:
-            response = json.dumps({'errors': data})
-        else:
-            response = json.dumps({'data': data})
-        return response
 class MemeAPIView(generics.ListAPIView):
     """
     :returns latest json
@@ -94,6 +85,7 @@ class MemeAPIView(generics.ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = MemeSerializer
     queryset = Meme.objects.all()
+    filter_backends = ['id']
 
 
 
