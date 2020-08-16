@@ -37,11 +37,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
         return CustomUser.objects.create_user(**validated_data)
 
-    def update(self, instance, validated_data):
-        instance.email = validated_data.get('email', instance.email)
-        instance.name = validated_data.get('name', instance.name)
-        instance.save()
-        return instance
+    # def update(self, instance, validated_data):
+    #     instance.email = validated_data.get('email', instance.email)
+    #     instance.name = validated_data.get('name', instance.name)
+    #     instance.save()
+    #     return instance
 
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.CharField(max_length=255)

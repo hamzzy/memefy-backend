@@ -85,7 +85,6 @@ class MemeAPIView(generics.ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = MemeSerializer
     queryset = Meme.objects.all()
-    filter_backends = ['id']
 
 
 
