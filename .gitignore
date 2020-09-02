@@ -3,6 +3,4 @@ __pycache__/
 .pytest_cache/
 __pypackages__/
 .env
-.idea
-.github
 *pyc
