@@ -1,7 +1,0 @@
-Django~=3.0.8
-djangorestframework~=3.11.0
-gunicorn==19.7.1
-psycopg2==2.7.5
-pytz==2017.3
-django-cors-headers~=3.4.0
-cloudinary~=1.22.0
