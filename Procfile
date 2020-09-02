@@ -1,1 +1,1 @@
-web: gunicorn memapp.wsgi
+web: gunicorn memeapp.wsgi
