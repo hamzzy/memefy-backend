@@ -7,8 +7,8 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework import parsers, viewsets, generics, permissions
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-from templated_email import InlineImage
-from templated_email import get_templated_mail
+# from templated_email import InlineImage
+# from templated_email import get_templated_mail
 
 from rest_framework.response import Response
 
