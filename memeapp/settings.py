@@ -25,7 +25,7 @@ SECRET_KEY = '!9x5m3o_fec)nww!wz^dxyc(iwo&9)ci61f77%6t_g49!2!=hv'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [*]
+ALLOWED_HOSTS = ['memefy-back.herokuapp.com','*']
 
 
 # Application definition
