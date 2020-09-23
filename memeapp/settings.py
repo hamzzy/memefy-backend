@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 import datetime
 import os
+import cloudinary
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -38,8 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
     'authentication',
     'meme',
+    'cloudinary'
 
 ]
 AUTH_USER_MODEL = 'authentication.CustomUser'
@@ -142,3 +145,11 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'hamat.ibrahim3'
 EMAIL_HOST_PASSWORD ='hamzatibrahim123'
+
+
+
+cloudinary.config(
+    cloud_name = "hamtech",
+    api_key = "368721655298621",
+    api_secret = "ADBzWW2b_KXJ9_aUQl3rb1QJVcg"
+)
