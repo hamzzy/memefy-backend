@@ -27,6 +27,7 @@ SECRET_KEY = '!9x5m3o_fec)nww!wz^dxyc(iwo&9)ci61f77%6t_g49!2!=hv'
 DEBUG = True
 
 ALLOWED_HOSTS = ['memefy-back.herokuapp.com','*']
+CORS_ORIGIN_ALLOW_ALL = True
 
 
 # Application definition
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'authentication',
+    'corsheaders',
     'meme',
     'cloudinary'
 
@@ -50,6 +52,7 @@ AUTH_USER_MODEL = 'authentication.CustomUser'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -85,8 +88,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=10),
-    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=2),
 }
 WSGI_APPLICATION = 'memeapp.wsgi.application'
 
