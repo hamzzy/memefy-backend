@@ -19,7 +19,7 @@ from authentication import urls
 from meme import meme_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/',include(urls)),
+    path('api/auth/', include(urls)),
     path('api/meme/', include(meme_urls)),
 
 ]
