@@ -13,14 +13,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
     Registeration Serilizer
     Return:authentication Registered
     """
-    email=serializers.CharField(max_length=255)
-    name=serializers.CharField(max_length=255)
+    email = serializers.CharField(max_length=255)
+    name = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=255, min_length=6, write_only=True)
 
     class Meta:
         model = CustomUser
         fields = ['id', 'email', 'name', 'password']
-        read_only_fields = ('id',)
+        # read_only_fields = ('id',)
 
     def validate(self, attrs):
         email = attrs.get('email', '')
@@ -28,6 +28,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if name.isalnum():
             raise serializers.ValidationError(
                 'this bjhbejhdb '
+            )
+        user = CustomUser.objects.get(email__exact=email)
+        if user:
+            raise serializers.ValidationError(
+                'this email already in use'
             )
         return attrs
 
@@ -43,10 +48,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
     #     instance.save()
     #     return instance
 
+
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.CharField(max_length=255)
     name = serializers.CharField(max_length=255, read_only=True)
-    password = serializers.CharField(max_length=128, write_only=True)
+    password = serializers.CharField(min_length=6, max_length=68, write_only=True)
     tokens = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
@@ -69,9 +75,15 @@ class LoginSerializer(serializers.ModelSerializer):
                 'A password is required to log in.'
             )
         user = authenticate(email=email, password=password)
+
         if not user:
             raise serializers.ValidationError(
                 'A user with this email and password was not found.'
+            )
+
+        if user.is_verified:
+            raise serializers.ValidationError(
+                'User not verified'
             )
 
         return {

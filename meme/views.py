@@ -9,7 +9,7 @@ from django.shortcuts import render
 from rest_framework import generics, status, permissions, renderers
 # Create your views here.
 from rest_framework.parsers import MultiPartParser, JSONParser
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -53,12 +53,11 @@ class MemeView(generics.GenericAPIView):
             imageURL = cloudinary.utils.cloudinary_url('memefy/' + imageName)
             serializer.save(fileURL=imageURL[0], user=self.request.user)
             return Response({
-                'status': 'success',
+                'msg': 'success',
             }, status=201)
 
 
         else:
-            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
 
 
@@ -78,17 +77,39 @@ class MemeDelete(generics.DestroyAPIView):
         return Response({'msg': 'meme deleted'}, status=status.HTTP_204_NO_CONTENT)
 
 
-class MemeAPIView(generics.ListAPIView):
+class MemeAPIView(generics.GenericAPIView):
     """
     :returns latest json
     """
-    permission_classes = (AllowAny,)
     serializer_class = MemeSerializer
-    queryset = Meme.objects.all()
 
+    def get(self, request):
+
+        if permissions.AllowAny:
+            me = Meme.objects.all()
+            serializer = MemeSerializer(me, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        if permissions.IsAuthenticated:
+            me = Meme.objects.filter(self.request.user)
+            serializer = MemeSerializer(me, many=True)
+
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class MemeSearch(generics.GenericAPIView):
     permission_classes = (AllowAny,)
     parser_classes = (JSONParser,)
     queryset = Meme.objects.all()
+
+    def get(self, request):
+        name = request.data['name']
+        meme = Meme.objects.filter(title__search=name)
+
+        if meme:
+            serializer = MemeSerializer(meme, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'msg': 'success',
+                'data': 'search not found'
+            }, status=status.HTTP_200_OK)

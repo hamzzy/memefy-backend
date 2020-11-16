@@ -43,9 +43,7 @@ class RegisterView(generics.GenericAPIView):
 
         return Response({
             'msg': 'CustomUser Registered',
-            'status': status.HTTP_200_OK
-        }
-        )
+        },status=status.HTTP_200_OK)
 
 
 class VerifyEmail(generics.GenericAPIView):
@@ -69,7 +67,8 @@ class VerifyEmail(generics.GenericAPIView):
 
 class ResendEmailVerification(generics.GenericAPIView):
     serializer_class = CustomUserSerializer
-    #permission_classes = ()
+
+    # permission_classes = ()
 
     def get(self, request):
         user = CustomUser.objects.get(email=request.user.email)
@@ -83,7 +82,7 @@ class ResendEmailVerification(generics.GenericAPIView):
                 'email_subject': 'Verify your email'}
 
         Util.send_email(data)
-        return Response({'email': 'Successfully resend verification'}, status=status.HTTP_200_OK)
+        return Response({'msg': 'Successfully resend verification'}, status=status.HTTP_200_OK)
 
 
 class LoginView(generics.GenericAPIView):
@@ -91,16 +90,24 @@ class LoginView(generics.GenericAPIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
+        get_verified = CustomUser.objects.get(email=request.data['email'])
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
+        if get_verified.is_verified == True:
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {'msg': "user account must be verified"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
 
 class UpdateProfileView(generics.UpdateAPIView):
     pass
+
 
 class RequestPasswordResetEmail(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer
@@ -125,8 +132,6 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'link you not'}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 class PasswordTokenCheckAPI(generics.GenericAPIView):
@@ -154,6 +159,7 @@ class PasswordTokenCheckAPI(generics.GenericAPIView):
 class SetNewPasswordAPIView(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
     permission_classes = (permissions.AllowAny,)
+
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)

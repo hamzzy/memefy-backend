@@ -18,7 +18,8 @@ class MemeCategory(serializers.ModelSerializer):
 
 class MemeSerializer(serializers.ModelSerializer):
     fileURL = serializers.CharField(required=False)
-    user=CustomUserSerializer(required=False, read_only=True)
+    user = CustomUserSerializer(required=False,)
+
 
     class Meta:
         model = Meme
