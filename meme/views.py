@@ -85,14 +85,8 @@ class MemeAPIView(generics.GenericAPIView):
 
     def get(self, request):
 
-        if permissions.AllowAny:
             me = Meme.objects.all()
             serializer = MemeSerializer(me, many=True)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        if permissions.IsAuthenticated:
-            me = Meme.objects.filter(self.request.user)
-            serializer = MemeSerializer(me, many=True)
-
             return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 

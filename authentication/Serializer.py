@@ -1,11 +1,15 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-from rest_framework import serializers
+from rest_framework import serializers, validators
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.validators import UniqueValidator, ValidationError
 from rest_framework_simplejwt.views import TokenObtainPairView  # new
 from .models import CustomUser
 from django.contrib.auth import authenticate
+
+from rest_framework.exceptions import PermissionDenied
+from rest_framework import status
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -13,28 +17,31 @@ class CustomUserSerializer(serializers.ModelSerializer):
     Registeration Serilizer
     Return:authentication Registered
     """
-    email = serializers.CharField(max_length=255)
+
+    email = serializers.CharField(max_length=255, validators=[
+        UniqueValidator(
+            queryset=CustomUser.objects.all(),
+            message="user with this email already exist",
+        )])
     name = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=255, min_length=6, write_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'name', 'password']
+        fields = ('id', 'email', 'name', 'password')
         # read_only_fields = ('id',)
 
-    def validate(self, attrs):
-        email = attrs.get('email', '')
-        name = attrs.get('name', '')
-        if name.isalnum():
-            raise serializers.ValidationError(
-                'this bjhbejhdb '
-            )
-        user = CustomUser.objects.get(email__exact=email)
-        if user:
-            raise serializers.ValidationError(
-                'this email already in use'
-            )
-        return attrs
+    def __init__(self, *args, **kwargs):
+        super(CustomUserSerializer, self).__init__(*args, **kwargs)
+        self.fields["name"].error_messages["required"] = u"name is required"
+        self.fields["name"].error_messages["blank"] = u"name cannot be blank"
+        self.fields["email"].error_messages["required"] = u"email is required"
+        self.fields["email"].error_messages["blank"] = u"email cannot be blank"
+        self.fields["password"].error_messages["blank"] = u"password cannot be blank"
+
+        self.fields["password"].error_messages[
+            "min_length"
+        ] = u"password must be at least 8 chars"
 
     def create(self, validated_data):
         # Use the `create_user` method we wrote earlier to create a new user.
@@ -49,36 +56,33 @@ class CustomUserSerializer(serializers.ModelSerializer):
     #     return instance
 
 
-class LoginSerializer(serializers.ModelSerializer):
+class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
     name = serializers.CharField(max_length=255, read_only=True)
-    password = serializers.CharField(min_length=6, max_length=68, write_only=True)
+    password = serializers.CharField(write_only=True)
     tokens = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
         model = CustomUser
         fields = ['email', 'name', 'password', 'tokens']
 
+    def __init__(self, *args, **kwargs):
+        super(LoginSerializer, self).__init__(*args, **kwargs)
+        self.fields["name"].error_messages["required"] = u"name is required"
+        self.fields["name"].error_messages["blank"] = u"name cannot be blank"
+        self.fields["email"].error_messages["required"] = u"email is required"
+        self.fields["email"].error_messages["blank"] = u"email cannot be blank"
+        self.fields["password"].error_messages["blank"] = u"password cannot be blank"
+
     def validate(self, attrs):
         email = attrs.get('email', '')
         password = attrs.get('password', '')
 
-        if email is None:
-            raise serializers.ValidationError(
-                'An email address is required to log in.'
-            )
-
-            # Raise an exception if a
-            # password is not provided.
-        if password is None:
-            raise serializers.ValidationError(
-                'A password is required to log in.'
-            )
         user = authenticate(email=email, password=password)
 
         if not user:
             raise serializers.ValidationError(
-                'A user with this email and password was not found.'
+                'email or password is incorrect'
             )
 
         if user.is_verified:

@@ -6,6 +6,7 @@ from django.utils.encoding import smart_bytes, smart_str, DjangoUnicodeDecodeErr
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework import parsers, viewsets, generics, permissions
 from rest_framework import status
+from rest_framework.parsers import JSONParser
 from rest_framework_simplejwt.tokens import RefreshToken
 # from templated_email import InlineImage
 # from templated_email import get_templated_mail
@@ -20,6 +21,7 @@ from .models import CustomUser
 
 
 class RegisterView(generics.GenericAPIView):
+    parser_classes = (JSONParser,)
     permission_classes = (permissions.AllowAny,)
     serializer_class = CustomUserSerializer
 
@@ -39,11 +41,11 @@ class RegisterView(generics.GenericAPIView):
         data = {'email_body': email_body, 'to_email': user.email,
                 'email_subject': 'Verify your email'}
 
-        Util.send_email(data)
+        # Util.send_email(data)
 
         return Response({
             'msg': 'CustomUser Registered',
-        },status=status.HTTP_200_OK)
+        }, status=status.HTTP_200_OK)
 
 
 class VerifyEmail(generics.GenericAPIView):
@@ -87,22 +89,23 @@ class ResendEmailVerification(generics.GenericAPIView):
 
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
+    parser_classes = (JSONParser,)
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
-        get_verified = CustomUser.objects.get(email=request.data['email'])
+        # get_verified = CustomUser.objects.get(email=request.data['email'])
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if get_verified.is_verified == True:
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
-        else:
-            return Response(
-                {'msg': "user account must be verified"},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+        # if get_verified.is_verified:
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+        # else:
+        #     return Response(
+        #         {'msg': "user account must be verified"},
+        #         status=status.HTTP_401_UNAUTHORIZED
+        #     )
 
 
 class UpdateProfileView(generics.UpdateAPIView):
