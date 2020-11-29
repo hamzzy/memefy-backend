@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'authentication',
     'corsheaders',
     'meme',
-    'cloudinary'
+    'cloudinary',
+    'django_filters',
 
 ]
 AUTH_USER_MODEL = 'authentication.CustomUser'
@@ -94,6 +95,9 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     # 'EXCEPTION_HANDLER': 'memeapp.Utils.custom_exception_handler'
+'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
 }
 
 

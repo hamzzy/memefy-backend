@@ -6,16 +6,16 @@ import cloudinary
 from cloudinary import uploader
 from django.http import Http404
 from django.shortcuts import render
+from django_filters import filters
 from rest_framework import generics, status, permissions, renderers
 # Create your views here.
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from authentication.models import CustomUser
 from authentication.permission import IsOwnerOrReadOnly
-from meme.Serializer import MemeCategory, MemeSerializer
+from meme.Serializer import MemeCategory, MemeSerializer, MemeFilter
 from meme.models import MemeCategories, Meme
 
 
@@ -33,7 +33,7 @@ class MemeView(generics.GenericAPIView):
 
     def get(self, request):
         items = Meme.objects.filter(user=self.request.user)
-        serializer = MemeSerializer(items, many=True)
+        serializer = MemeSerializer(items,many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def upload_image_cloudinary(self, request, imageName):
@@ -55,7 +55,6 @@ class MemeView(generics.GenericAPIView):
             return Response({
                 'msg': 'success',
             }, status=201)
-
 
         else:
             return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
@@ -90,20 +89,7 @@ class MemeAPIView(generics.GenericAPIView):
             return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-class MemeSearch(generics.GenericAPIView):
-    permission_classes = (AllowAny,)
-    parser_classes = (JSONParser,)
+class MemeSearch(generics.ListAPIView):
     queryset = Meme.objects.all()
-
-    def get(self, request):
-        name = request.data['name']
-        meme = Meme.objects.filter(title__search=name)
-
-        if meme:
-            serializer = MemeSerializer(meme, many=True)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response({
-                'msg': 'success',
-                'data': 'search not found'
-            }, status=status.HTTP_200_OK)
+    serializer_class = MemeSerializer
+    filterset_class = MemeFilter  # here
