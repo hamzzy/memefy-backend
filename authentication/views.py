@@ -51,12 +51,11 @@ class RegisterView(generics.GenericAPIView):
         user = CustomUser.objects.get(email=user_data['email'])
         token = RefreshToken.for_user(user).access_token
         current_site = get_current_site(request).domain
-        relativeLink = reverse('email-verify')
         if request.is_secure():
             protocol = 'https://'
         else:
             protocol = 'http://'
-        absurl = protocol + current_site + relativeLink + "?token=" + str(token)
+        absurl = protocol + "localhost:3000/activate-email/"+str(token)
         context = {
             'url': absurl,
             'user': user,
@@ -71,8 +70,8 @@ class RegisterView(generics.GenericAPIView):
 class VerifyEmail(generics.GenericAPIView):
     serializer_class = EmailVerificationSerializer
 
-    def get(self, request):
-        token = request.GET.get('token')
+    def post(self, request):
+        token = request.data['token']
         try:
             payload = jwt.decode(token, settings.SECRET_KEY)
             user = CustomUser.objects.get(id=payload['user_id'])
@@ -121,12 +120,12 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             token = PasswordResetTokenGenerator().make_token(user)
             current_site = get_current_site(
                 request=request).domain
-            relativeLink = reverse('password-reset-confirm', kwargs={'uidb64': uidb64, 'token': token})
+            relativeLink = "/password-reset-confirm/" +uidb64+"/"+token
             if request.is_secure():
                 protocol = 'https://'
             else:
                 protocol = 'http://'
-            absurl = protocol + current_site + relativeLink
+            absurl = protocol + 'localhost:3000' + relativeLink
 
             context = {
                 'url': absurl,
@@ -136,7 +135,7 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             password_reset_email(to=user, context=context)
             return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
         else:
-            return Response({'error': 'link you not'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'email cannot be empty'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PasswordTokenCheckAPI(generics.GenericAPIView):

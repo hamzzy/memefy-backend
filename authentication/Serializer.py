@@ -97,10 +97,9 @@ class LoginSerializer(serializers.Serializer):
         if user.is_verified == False:
             user = CustomUser.objects.get(email=email)
             token = RefreshToken.for_user(user).access_token
-            current_site = "memefy-back.herokuapp.com/"
-            relativeLink = reverse('email-verify')
-            protocol = 'https://'
-            absurl = protocol + current_site + relativeLink + "?token=" + str(token)
+            # current_site = "memefy-back.herokuapp.com/"
+            # relativeLink = reverse('email-verify')
+            absurl = "http://localhost:3000/activate-email/"+str(token)
 
             context = {
                 'url': absurl,
@@ -179,12 +178,19 @@ class UserAccountChangePasswordSerializer(serializers.Serializer):
 
 
 class SetNewPasswordSerializer(serializers.Serializer):
+
+
     password = serializers.CharField(
         min_length=6, max_length=68, write_only=True)
     token = serializers.CharField(
         min_length=1, write_only=True)
     uidb64 = serializers.CharField(
         min_length=1, write_only=True)
+
+    def __init__(self, *args, **kwargs):
+        super(SetNewPasswordSerializer, self).__init__(*args, **kwargs)
+        self.fields["password"].error_messages["required"] = u"password is required"
+        self.fields["password"].error_messages["blank"] = u"password  cannot be blank"
 
     class Meta:
         fields = ['password', 'token', 'uidb64']
