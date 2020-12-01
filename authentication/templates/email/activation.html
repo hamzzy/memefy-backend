@@ -1,0 +1,18 @@
+{% block subject %}Verify Your Account{% endblock %}
+
+{% block text_body %}
+Please {{url}} verify your account.
+
+{{url}}
+
+Password reset for {{user}}
+{% endblock %}
+
+{% block html_body %}
+<h3>Hi, {{user}}</h3>
+
+<P>
+	Please Verify your account:
+	<a href="{{url}}">Link</a>
+</P>
+{% endblock %}

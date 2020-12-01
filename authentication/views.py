@@ -14,10 +14,27 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 
 from memeapp import settings
+from permission import IsOwnerOrReadOnly
 from .Serializer import CustomUserSerializer, LoginSerializer, ResetPasswordEmailRequestSerializer, \
-    EmailVerificationSerializer, SetNewPasswordSerializer
-from .Utils import Util
+    EmailVerificationSerializer, SetNewPasswordSerializer, UserAccountChangePasswordSerializer, UserAccountUpdateSerializer
+from .Utils import activation_email, password_reset_email
 from .models import CustomUser
+
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+    parser_classes = (JSONParser,)
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        # get_verified = CustomUser.objects.get(email=request.data['email'])
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class RegisterView(generics.GenericAPIView):
@@ -35,13 +52,16 @@ class RegisterView(generics.GenericAPIView):
         token = RefreshToken.for_user(user).access_token
         current_site = get_current_site(request).domain
         relativeLink = reverse('email-verify')
-        absurl = 'http://' + current_site + relativeLink + "?token=" + str(token)
-        email_body = 'Hi ' + user.name + \
-                     ' Use the link below to verify your email \n' + absurl
-        data = {'email_body': email_body, 'to_email': user.email,
-                'email_subject': 'Verify your email'}
-
-        # Util.send_email(data)
+        if request.is_secure():
+            protocol = 'https://'
+        else:
+            protocol = 'http://'
+        absurl = protocol + current_site + relativeLink + "?token=" + str(token)
+        context = {
+            'url': absurl,
+            'user': user,
+        }
+        activation_email(to=user, context=context)
 
         return Response({
             'msg': 'CustomUser Registered',
@@ -67,49 +87,24 @@ class VerifyEmail(generics.GenericAPIView):
             return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ResendEmailVerification(generics.GenericAPIView):
-    serializer_class = CustomUserSerializer
-
-    # permission_classes = ()
-
-    def get(self, request):
-        user = CustomUser.objects.get(email=request.user.email)
-        token = RefreshToken.for_user(user).access_token
-        current_site = get_current_site(request).domain
-        relativeLink = reverse('email-verify')
-        absurl = 'http://' + current_site + relativeLink + "?token=" + str(token)
-        email_body = 'Hi ' + user.name + \
-                     ' Use the link below to verify your email \n' + absurl
-        data = {'email_body': email_body, 'to_email': user.email,
-                'email_subject': 'Verify your email'}
-
-        Util.send_email(data)
-        return Response({'msg': 'Successfully resend verification'}, status=status.HTTP_200_OK)
-
-
-class LoginView(generics.GenericAPIView):
-    serializer_class = LoginSerializer
-    parser_classes = (JSONParser,)
-    permission_classes = (permissions.AllowAny,)
-
-    def post(self, request):
-        # get_verified = CustomUser.objects.get(email=request.data['email'])
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        # if get_verified.is_verified:
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-        # else:
-        #     return Response(
-        #         {'msg': "user account must be verified"},
-        #         status=status.HTTP_401_UNAUTHORIZED
-        #     )
-
-
-class UpdateProfileView(generics.UpdateAPIView):
-    pass
+# class ResendEmailVerification(generics.GenericAPIView):
+#     serializer_class = CustomUserSerializer
+#
+#     # permission_classes = ()
+#
+#     def get(self, request):
+#         user = CustomUser.objects.get(email=request.user.email)
+#         token = RefreshToken.for_user(user).access_token
+#         current_site = get_current_site(request).domain
+#         relativeLink = reverse('email-verify')
+#         absurl = 'http://' + current_site + relativeLink + "?token=" + str(token)
+#         email_body = 'Hi ' + user.name + \
+#                      ' Use the link below to verify your email \n' + absurl
+#         data = {'email_body': email_body, 'to_email': user.email,
+#                 'email_subject': 'Verify your email'}
+#
+#         Util.send_email(data)
+#         return Response({'msg': 'Successfully resend verification'}, status=status.HTTP_200_OK)
 
 
 class RequestPasswordResetEmail(generics.GenericAPIView):
@@ -127,11 +122,18 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             current_site = get_current_site(
                 request=request).domain
             relativeLink = reverse('password-reset-confirm', kwargs={'uidb64': uidb64, 'token': token})
-            absurl = 'http://' + current_site + relativeLink
-            email_body = 'Hello, \n Use link below to reset your password  \n' + absurl
-            data = {'email_body': email_body, 'to_email': user.email,
-                    'email_subject': 'Reset your passsword'}
-            Util.send_email(data)
+            if request.is_secure():
+                protocol = 'https://'
+            else:
+                protocol = 'http://'
+            absurl = protocol + current_site + relativeLink
+
+            context = {
+                'url': absurl,
+                'user': user
+            }
+
+            password_reset_email(to=user, context=context)
             return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'link you not'}, status=status.HTTP_400_BAD_REQUEST)
@@ -167,3 +169,32 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)
+
+
+class UserAccountChangePasswordView(generics.CreateAPIView):
+    """"Change the password of logged in user.
+    post:
+    Request to change the password of the user, it requires to provide *old_password* and *new_password*
+    parameters.
+    """
+
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+
+    serializer_class = UserAccountChangePasswordSerializer
+
+
+class UserAccountUpdateView(generics.UpdateAPIView):
+    """"Change the password of logged in user.
+    post:
+    Request to change the password of the user, it requires to provide *old_password* and *new_password*
+    parameters.
+    """
+
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+    serializer_class = UserAccountUpdateSerializer
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.serializer_class(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'msg': "data updated"}, status=status.HTTP_200_OK)

@@ -157,10 +157,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'hamat.ibrahim3'
-EMAIL_HOST_PASSWORD ='hamzatibrahim123'
+EMAIL_HOST = 'smtp.mailtrap.io'
+EMAIL_HOST_USER = '20191607b448d6'
+EMAIL_HOST_PASSWORD = 'c5a440a4210fd5'
+EMAIL_PORT = '2525'
+
 
 
 

@@ -33,15 +33,16 @@ class MemeView(generics.GenericAPIView):
 
     def get(self, request):
         items = Meme.objects.filter(user=self.request.user)
-        serializer = MemeSerializer(items,many=True)
+        serializer = MemeSerializer(items, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def upload_image_cloudinary(self, request, imageName):
         up = uploader.upload(
             file=request.data['file'],
             public_id=imageName,
-            folder='memefy'
-        )
+            folder='memefy',
+            transformation=[{"width": 300, "height": 300, "crop": "fill"}])
+
         return up
 
     def post(self, request):
@@ -76,17 +77,46 @@ class MemeDelete(generics.DestroyAPIView):
         return Response({'msg': 'meme deleted'}, status=status.HTTP_204_NO_CONTENT)
 
 
-class MemeAPIView(generics.GenericAPIView):
+class MemeupdateView(generics.UpdateAPIView):
+    queryset = Meme.objects.all()
+    serializer_class = MemeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    # def get_object(self, id):
+    #     try:
+    #         return Meme.objects.get(pk=id)
+    #     except Meme.DoesNotExist:
+    #         raise Http404
+    #
+    # def put(self, request, id, format=None):
+    #     serializer = self.serializer_class(data=request.data)
+    #     if serializer.is_valid():
+    #
+    #         imageName = '{0}_{1}'.format(request.FILES['file'].name.split('.')[0], randint(0, 100))
+    #         # d = self.upload_image_cloudinary(request, imageName)
+    #         # imageURL = cloudinary.utils.cloudinary_url('memefy/' + imageName)
+    #         # serializer.save(fileURL=imageURL[0], user=self.request.user)
+    #         return Response({
+    #             'msg': 'success',
+    #         }, status=201)
+    #
+    #     else:
+    #         return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
+
+
+
+
+class MemeAPIView(generics.ListAPIView):
     """
     :returns latest json
     """
     serializer_class = MemeSerializer
+    queryset = Meme.objects.all()
 
     def get(self, request):
-
-            me = Meme.objects.all()
-            serializer = MemeSerializer(me, many=True)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        me = Meme.objects.all()
+        serializer = MemeSerializer(me, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class MemeSearch(generics.ListAPIView):
