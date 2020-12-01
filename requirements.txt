@@ -9,5 +9,5 @@ django-cors-headers==3.5.0
 
 django-filter~=2.4.0
 PyJWT~=1.7.1
-templated-mail~=0.4.0.2
+templated-mail
 
