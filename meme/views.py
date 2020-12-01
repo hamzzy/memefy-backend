@@ -6,7 +6,6 @@ import cloudinary
 from cloudinary import uploader
 from django.http import Http404
 from django.shortcuts import render
-from django_filters import filters
 from rest_framework import generics, status, permissions, renderers
 # Create your views here.
 from rest_framework.parsers import MultiPartParser, JSONParser
@@ -70,6 +69,7 @@ class MemeDelete(generics.DestroyAPIView):
         if instance is None:
             return Response("Cannot delete meme", status=status.HTTP_400_BAD_REQUEST)
         else:
+
             pub1, pub2 = instance.fileURL.split('/')[7:]
             pub_id = pub1 + '/' + pub2
             cloudinary.uploader.destroy(pub_id, invalidate=True)
