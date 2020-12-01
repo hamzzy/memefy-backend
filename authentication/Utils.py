@@ -1,4 +1,4 @@
-import templated_mail.mail
+import templated_mail
 
 
 def activation_email(to, context):

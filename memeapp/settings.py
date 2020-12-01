@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'meme',
     'cloudinary',
     'django_filters',
-    'templated_mail',
 
 ]
 AUTH_USER_MODEL = 'authentication.CustomUser'
