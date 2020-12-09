@@ -1,4 +1,19 @@
 # memefy-backend
-![Django CI](https://github.com/hamzzy/memefy-backend/workflows/Django%20CI/badge.svg)
 
-This is memefy Backend  Service
+
+## The Backend  Service for a meme sharing paltform
+
+
+# Database Diagram
+ <img src="db.png">
+
+# Built with 
+-  Django 3
+-  Python 3
+-  Django Rest Framework
+-  Cloudinary image library
+
+# To run
+- git clone repo
+- python3  manage.py makemigrations
+- python3  manage.py migrate
